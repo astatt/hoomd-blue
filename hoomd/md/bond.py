@@ -51,6 +51,10 @@ class Bond(Force):
         This class should not be instantiated by users. The class can be used
         for `isinstance` or `issubclass` checks.
     """
+    
+    # Module where the C++ class is defined. Reassign this when developing an
+    # external plugin.
+    _ext_module = _md
 
     def __init__(self):
         super().__init__()
