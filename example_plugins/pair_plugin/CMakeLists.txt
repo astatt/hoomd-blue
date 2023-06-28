@@ -53,6 +53,7 @@ install(TARGETS _${COMPONENT_NAME}
 set(files
     __init__.py
     pair.py
+    bond.py
     )
 
 install(FILES ${files}

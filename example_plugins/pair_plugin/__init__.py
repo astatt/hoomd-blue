@@ -4,3 +4,4 @@
 """Example python module."""
 
 from hoomd.pair_plugin import pair
+from hoomd.pair_plugin import bond

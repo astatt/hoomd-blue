@@ -3,11 +3,14 @@
 
 // Include the defined classes that are to be exported to python
 #include "EvaluatorPairExample.h"
+#include "EvaluatorBondQuartic.h"
 
 #include "hoomd/md/PotentialPair.h"
+#include "hoomd/md/PotentialBond.h"
 #include <pybind11/pybind11.h>
 #ifdef ENABLE_HIP
 #include "hoomd/md/PotentialPairGPU.h"
+#include "hoomd/md/PotentialBondGPU.h"
 #endif
 
 namespace hoomd
@@ -20,8 +23,11 @@ namespace md
 PYBIND11_MODULE(_pair_plugin, m)
     {
     detail::export_PotentialPair<EvaluatorPairExample>(m, "PotentialPairExample");
+    detail::export_PotentialBond<EvaluatorBondQuartic>(m, "PotentialBondQuartic");
 #ifdef ENABLE_HIP
     detail::export_PotentialPairGPU<EvaluatorPairExample>(m, "PotentialPairExampleGPU");
+    detail::export_PotentialBondGPU<EvaluatorBondQuartic>(m, "PotentialBondQuarticGPU");
+
 #endif
     }
 
