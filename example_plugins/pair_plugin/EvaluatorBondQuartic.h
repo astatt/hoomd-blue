@@ -30,7 +30,7 @@ namespace md
 struct quartic_params
     {
     Scalar k;
-    Scalar r_0;
+    Scalar r_cut;
     Scalar r_1;
 
 
@@ -38,14 +38,14 @@ struct quartic_params
     quartic_params()
         {
         k = 0;
-        r_0 = 0;
+        r_cut = 0;
         r_1 = 0;
         }
 
     quartic_params(pybind11::dict v)
         {
         k = v["k"].cast<Scalar>();
-        r_0 = v["r0"].cast<Scalar>();
+        r_cut = v["rcut"].cast<Scalar>();
         r_1 = v["r1"].cast<Scalar>();
 
         }
@@ -54,7 +54,7 @@ struct quartic_params
         {
         pybind11::dict v;
         v["k"] = k;
-        v["r0"] = r_0;
+        v["rcut"] = r_cut;
         v["r1"] = r_1;
         return v;
         }
@@ -64,7 +64,7 @@ struct quartic_params
 //! Class for evaluating the FENE bond potential
 /*! The parameters are:
     - \a K (params.x) Stiffness parameter for the force computation
-    - \a r_0 (params.y) maximum bond length for the force computation
+    - \a r_cut (params.y) maximum bond length for the force computation
     - \a r_1 (params.z) Value of lj1 = 4.0*epsilon*pow(sigma,12.0)
 */
 class EvaluatorBondQuartic
@@ -78,7 +78,7 @@ class EvaluatorBondQuartic
         \param _params Per type pair parameters of this potential
     */
     DEVICE EvaluatorBondQuartic(Scalar _rsq, const param_type& _params)
-        : rsq(_rsq), k(_params.k), r_0(_params.r_0), r_1(_params.r_1)
+        : rsq(_rsq), k(_params.k), r_cut(_params.r_cut), r_1(_params.r_1)
         {
         }
 
@@ -116,15 +116,23 @@ class EvaluatorBondQuartic
     DEVICE bool evalForceAndEnergy(Scalar& force_divr, Scalar& bond_eng)
         {
 
-        Scalar rtemp = rsq;
+        Scalar r = sqrt(rsq);
 
-        // compute the force magnitude/r in forcemag_divr (FLOPS: 9)
-        Scalar r2inv = Scalar(1.0) / rsq;
-      
+        // force_divr = - 1/r *  d/dr bond_eng 
+        force_divr = k*(r-r_cut)*(r-r_cut)*(3*r_1+r_cut-4*r)/r;
+  
+// if the result is not finite, it is likely because of a division by 0, setting force_divr to 0
+// will correctly result in a 0 force in this case
+#ifdef __HIPCC__
+        if (!isfinite(force_divr))
+#else
+        if (!std::isfinite(force_divr))
+#endif
+            {
+            force_divr = Scalar(0);
+            }
 
-        force_divr = 0;
-        bond_eng = 0;
-
+        bond_eng = k*(r-r_cut)*(r-r_cut)*(r-r_cut)*(r-r_1);
 
         return true;
         }
@@ -142,7 +150,7 @@ class EvaluatorBondQuartic
     protected:
     Scalar rsq;   //!< Stored rsq from the constructor
     Scalar k;     //!< K parameter
-    Scalar r_0;   //!< r_0 parameter
+    Scalar r_cut;   //!< r_0 parameter
     Scalar r_1;   //!< r_1 parameter
     };
 

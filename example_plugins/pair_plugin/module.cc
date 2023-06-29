@@ -26,7 +26,7 @@ PYBIND11_MODULE(_pair_plugin, m)
     detail::export_PotentialBond<EvaluatorBondQuartic>(m, "PotentialBondQuartic");
 #ifdef ENABLE_HIP
     detail::export_PotentialPairGPU<EvaluatorPairExample>(m, "PotentialPairExampleGPU");
-    detail::export_PotentialBondGPU<EvaluatorBondQuartic>(m, "PotentialBondQuarticGPU");
+    detail::export_PotentialBondGPU<EvaluatorBondQuartic,2>(m, "PotentialBondQuarticGPU");
 
 #endif
     }

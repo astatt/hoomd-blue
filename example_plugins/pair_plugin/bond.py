@@ -18,10 +18,11 @@ class Quartic(bond.Bond):
     # set static class data
     _ext_module = _pair_plugin
     _cpp_class_name = "PotentialBondQuartic"
-
-    
+  
     def __init__(self):
         super().__init__()
         params = TypeParameter("params", "bond_types",
-                               TypeParameterDict(k=float, r0=float, r1=float, len_keys=1))
+                               TypeParameterDict(k=float, rcut=float, r1=float, len_keys=1))
         self._add_typeparam(params)
+
+

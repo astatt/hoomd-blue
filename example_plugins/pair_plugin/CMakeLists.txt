@@ -12,11 +12,14 @@ endif()
 # Specify any C++ sources
 set(_${COMPONENT_NAME}_sources
     module.cc
+    export_PotentialBondQuartic.cc
     )
 
 # Specify any CUDA sources
 set(_${COMPONENT_NAME}_cu_sources
     PotentialPairExampleGPUKernel.cu
+    PotentialBondQuarticGPUKernel.cu
+    export_PotentialBondQuarticGPU.cc
     )
 
 if (ENABLE_HIP)
