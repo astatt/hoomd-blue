@@ -61,7 +61,7 @@ struct quartic_params
 #endif
     } __attribute__((aligned(16)));
 
-//! Class for evaluating the FENE bond potential
+//! Class for evaluating the Quartic bond potential
 /*! The parameters are:
     - \a K (params.x) Stiffness parameter for the force computation
     - \a r_cut (params.y) maximum bond length for the force computation
@@ -117,6 +117,14 @@ class EvaluatorBondQuartic
         {
 
         Scalar r = sqrt(rsq);
+
+        // cutoff force and energy after r_cut to be zero
+        if (rsq >= r_cut * r_cut)
+        {
+            force_divr = 0;
+            bond_eng = 0;
+            return true;
+        }
 
         // force_divr = - 1/r *  d/dr bond_eng 
         force_divr = k*(r-r_cut)*(r-r_cut)*(3*r_1+r_cut-4*r)/r;
