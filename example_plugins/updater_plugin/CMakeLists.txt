@@ -5,12 +5,11 @@ set(COMPONENT_NAME updater_plugin)
 # Specify any C++ sources
 set(_${COMPONENT_NAME}_sources
     module.cc
-    ExampleUpdater.cc
+    BoxResizeConstVolumeUpdater.cc
     )
 
 # Specify any CUDA sources
 set(_${COMPONENT_NAME}_cu_sources
-    ExampleUpdater.cu
     )
 
 if (ENABLE_HIP)

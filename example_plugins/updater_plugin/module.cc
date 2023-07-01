@@ -2,7 +2,7 @@
 // Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 // Include the defined classes that are to be exported to python
-#include "ExampleUpdater.h"
+#include "BoxResizeConstVolumeUpdater.h"
 
 #include <pybind11/pybind11.h>
 
@@ -12,8 +12,5 @@ using namespace hoomd::detail;
 // in CMakeLists (with an underscore in front)
 PYBIND11_MODULE(_updater_plugin, m)
     {
-    export_ExampleUpdater(m);
-#ifdef ENABLE_HIP
-    export_ExampleUpdaterGPU(m);
-#endif
+    export_BoxResizeConstVolumeUpdater(m);
     }
