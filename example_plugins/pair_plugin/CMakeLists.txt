@@ -17,6 +17,7 @@ set(_${COMPONENT_NAME}_sources
 # Specify any CUDA sources
 set(_${COMPONENT_NAME}_cu_sources
     PotentialPairExampleGPUKernel.cu
+    PotentialPairContinousSquareWellGPUKernel.cu
     )
 
 if (ENABLE_HIP)
