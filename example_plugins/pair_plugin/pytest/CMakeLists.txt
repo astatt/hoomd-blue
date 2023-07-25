@@ -1,7 +1,7 @@
 # List all files that include python tests.
 set(files __init__.py
           test_example_pair.py
-          test_continous_squarewell_pair.py
+          test_continuous_squarewell_pair.py
     )
 
 # Copy tests to the install directory.

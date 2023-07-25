@@ -85,7 +85,7 @@ class EvaluatorPairContinuousSquareWell
         \param _rcutsq Squared distance at which the potential goes to 0
         \param _params Per type pair parameters of this potential
     */
-    DEVICE EvaluatorPairExample(Scalar _rsq, Scalar _rcutsq, const param_type& _params)
+    DEVICE EvaluatorPairContinuousSquareWell(Scalar _rsq, Scalar _rcutsq, const param_type& _params)
     //TODO: add all variable assignements here  
         : rsq(_rsq), rcutsq(_rcutsq), k(_params.k), sigma(_params.sigma)
         {
@@ -122,9 +122,9 @@ class EvaluatorPairContinuousSquareWell
             Scalar rinv = 1 / r;
            
             //TODO: change this to be force divided by r
-            force_divr = k * overlap * rinv;
+            force_divr = k  * rinv;
             //TODO: change this to be energy 
-            pair_eng = Scalar(0.5) * k * overlap * overlap;
+            pair_eng = Scalar(0.5) * k ;
 
             //TODO: this is related to 'none', 'xplor', and 'shift' - look into hoomd documentation
             //TODO: to see which mode makes sense for this potential. 
@@ -133,7 +133,7 @@ class EvaluatorPairContinuousSquareWell
                 {
                 Scalar rcut = fast::sqrt(rcutsq);
                 Scalar cut_overlap = sigma - rcut;
-                pair_eng -= Scalar(0.5) * k * cut_overlap * cut_overlap;
+                pair_eng -= Scalar(0.5) * k ;
                 }
             return true;
             }

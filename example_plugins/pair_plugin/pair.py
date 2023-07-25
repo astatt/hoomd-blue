@@ -26,3 +26,26 @@ class ExamplePair(pair.Pair):
             'params', 'particle_types',
             TypeParameterDict(k=float, sigma=float, len_keys=2))
         self._add_typeparam(params)
+
+
+class ContinuousSquareWellPair(pair.Pair):
+    """ContinuousSquareWell pair potential.
+    
+    #TODO: write proper documentation for this - see hoomd documentation for examples 
+
+    """
+
+    # set static class data
+    _ext_module = _pair_plugin
+    _cpp_class_name = "PotentialPairContinuousSquareWell"
+    #TODO: check that these modes make sense for potential - I think only none might make sense?
+    #TODO: check in hoomd documentation for what these do
+    _accepted_modes = ("none", "shift", "xplor")
+
+    def __init__(self, nlist, default_r_cut=None, default_r_on=0., mode='none'):
+        super().__init__(nlist, default_r_cut, default_r_on, mode)
+        #TODO: add parameters as needed for potential
+        params = TypeParameter(
+            'params', 'particle_types',
+            TypeParameterDict(k=float, sigma=float, len_keys=2))
+        self._add_typeparam(params)
