@@ -12,36 +12,37 @@ import pytest
 import numpy as np
 
 #TODO: change this function to be squarewell, add parameters needed
-def squarewell_force_and_energy(dx, k, sigma, r_cut, shift=False):
+def squarewell_force_and_energy(dx, n, m, lambda_val, r_cut, shift=False):
 
     dr = np.linalg.norm(dx)
 
     if dr >= r_cut:
         return np.array([0.0, 0.0, 0.0], dtype=np.float64), 0.0
 
-    f = k * (sigma - dr) * np.array(dx, dtype=np.float64) / dr
-    e = 0.5 * k * (sigma - dr)**2
+    f = n/2.0*(1/dx)**(n + 1) - (m*2*dx - lambda_val - 1)*np.exp(-m*(dx - 1)*(dx - lambda_val))/(1 + np.exp(-m*(dx - 1)*(dx - lambda_val)))**2.0
+    e = 1.0/2.0*((1/dx)**n + (1 - np.exp(-m*(dx - 1)*(dx - lambda_val)))/(1 + np.exp(-m*(dx - 1)*(r - lambda_val))))
     if shift:
-        e -= 0.5 * k * (r_cut - sigma)**2
+        e = e
 
     return f, e
 
 #TODO: decide on distances and parameters to use for test 
 
 # Build up list of parameters.
-distances = np.linspace(0.1, 2.0, 3)
-ks = [0.5, 2.0, 5.0]
-sigmas = [0.5, 1.0, 1.5]
+distances = np.linspace(1.0, 1.05, 2)
+ns = [400, 2500]
+ms = [400, 20000]
+lambda_vals = [1.5, 1.05]
 # No need to test "xplor", as that is handled outside of the plugin impl.
-modes = ["none", "shift"]
+modes = ["none"]
 
-testdata = list(itertools.product(distances, ks, sigmas, modes))
+testdata = list(itertools.product(distances, ns, ms, lambda_vals, modes))
 
 
-@pytest.mark.parametrize("distance, k, sigma, mode", testdata)
+@pytest.mark.parametrize("distance, n, m, lamnbda_val, mode", testdata)
 def test_force_and_energy_eval(simulation_factory,
-                               two_particle_snapshot_factory, distance, k,
-                               sigma, mode):
+                               two_particle_snapshot_factory, distance, n, m,
+                               lambda_val, mode):
 
     # Build the simulation from the factory fixtures defined in
     # hoomd/conftest.py.
@@ -53,9 +54,9 @@ def test_force_and_energy_eval(simulation_factory,
 
     cell = hoomd.md.nlist.Cell(buffer=0.4)
     #TODO: change names to correct square well ones 
-    example_pair: hoomd.md.pair.Pair = pair_plugin.pair.ExamplePair(
-        cell, default_r_cut=sigma, mode=mode)
-    example_pair.params[("A", "A")] = dict(k=k, sigma=sigma)
+    example_pair: hoomd.md.pair.Pair = pair_plugin.pair.ExamplePairContinuousSquareWell(
+        cell, default_r_cut=3, mode=mode)
+    example_pair.params[("A", "A")] = dict(n=n, m=m, lambda_val = lambda_val)
     integrator.forces = [example_pair]
     integrator.methods = [nve]
 
@@ -68,7 +69,7 @@ def test_force_and_energy_eval(simulation_factory,
 
         # Compute force and energy from Python
         shift = mode == "shift"
-        f, e = squarewell_force_and_energy(vec_dist, k, sigma, sigma, shift)
+        f, e = squarewell_force_and_energy(vec_dist, n, m, lambda_val, 3, shift)
         e /= 2.0
 
     # Test that the forces and energies match that predicted by the Python
