@@ -21,8 +21,12 @@ namespace md
 PYBIND11_MODULE(_pair_plugin, m)
     {
     detail::export_PotentialPair<EvaluatorPairExample>(m, "PotentialPairExample");
+    detail::export_PotentialPair<EvaluatorPairContinuousSquareWell>(m, "PotentialPairContinuousSquareWell");
+
 #ifdef ENABLE_HIP
     detail::export_PotentialPairGPU<EvaluatorPairExample>(m, "PotentialPairExampleGPU");
+    detail::export_PotentialPairGPU<EvaluatorPairContinuousSquareWell>(m, "PotentialPairContinuousSquareWellGPU");
+    
 #endif
     detail::export_PotentialPair<EvaluatorPairContinuousSquareWell>(m, "PotentialPairContinuousSquareWell");
 #ifdef ENABLE_HIP

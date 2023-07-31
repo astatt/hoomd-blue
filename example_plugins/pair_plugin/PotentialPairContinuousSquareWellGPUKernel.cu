@@ -11,7 +11,8 @@ namespace md
 namespace kernel
     {
 template __attribute__((visibility("default"))) hipError_t
-gpu_compute_pair_forces<EvaluatorPairExample>(const pair_args_t& pair_args,
+
+gpu_compute_pair_forces<EvaluatorPairContinuousSquareWell>(const pair_args_t& pair_args,
                                               const EvaluatorPairContinuousSquareWell::param_type* d_params);
     } // end namespace kernel
     } // end namespace md
