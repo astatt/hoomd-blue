@@ -29,7 +29,7 @@ def squarewell_force_and_energy(dx, n, m, lambda_val, r_cut, shift=False):
 #TODO: decide on distances and parameters to use for test 
 
 # Build up list of parameters.
-distances = np.linspace(1.0, 1.05, 2)
+distances = np.linspace(1.01, 1.05, 2)
 ns = [400, 2500]
 ms = [400, 20000]
 lambda_vals = [1.5, 1.05]
