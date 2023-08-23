@@ -47,6 +47,6 @@ class ContinuousSquareWellPair(pair.Pair):
         super().__init__(nlist, default_r_cut, default_r_on, mode)
         params = TypeParameter(
             'params', 'particle_types',
-            TypeParameterDict(n=float, m=float, lambda_val=float, len_keys=2))
+            TypeParameterDict(n=float, m=float, lambda_val=float, A=float, len_keys=2))
         self._add_typeparam(params)
 
