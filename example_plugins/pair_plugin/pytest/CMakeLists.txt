@@ -2,6 +2,7 @@
 set(files __init__.py
           test_example_pair.py
           test_continuous_squarewell_pair.py
+          test_expanded_yukawa_pair.py
     )
 
 # Copy tests to the install directory.

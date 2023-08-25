@@ -50,3 +50,26 @@ class ContinuousSquareWellPair(pair.Pair):
             TypeParameterDict(n=float, m=float, lambda_val=float, A=float, len_keys=2))
         self._add_typeparam(params)
 
+class ExpandedYukawaPair(pair.Pair):
+    """ExpandedYukawa pair potential.
+    
+    #TODO: write proper documentation for this - see hoomd documentation for examples 
+
+    """
+
+    # set static class data
+    _ext_module = _pair_plugin
+    _cpp_class_name = "PotentialPairExpandedYukawa"
+
+    #TODO: check that these modes make sense for potential - I think only none might make sense?
+    #TODO: check in hoomd documentation for what these do
+
+    _accepted_modes = ("none", "shift")
+
+    def __init__(self, nlist, default_r_cut=None, default_r_on=0., mode='none'):
+        super().__init__(nlist, default_r_cut, default_r_on, mode)
+        params = TypeParameter(
+            'params', 'particle_types',
+            TypeParameterDict(epsilon=float, kappa=float, delta=float, len_keys=2))
+        self._add_typeparam(params)
+

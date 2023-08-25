@@ -4,6 +4,7 @@
 // Include the defined classes that are to be exported to python
 #include "EvaluatorPairExample.h"
 #include "EvaluatorPairContinuousSquareWell.h"
+#include "EvaluatorPairExpandedYukawa.h"
 
 #include "hoomd/md/PotentialPair.h"
 #include <pybind11/pybind11.h>
@@ -22,10 +23,12 @@ PYBIND11_MODULE(_pair_plugin, m)
     {
     detail::export_PotentialPair<EvaluatorPairExample>(m, "PotentialPairExample");
     detail::export_PotentialPair<EvaluatorPairContinuousSquareWell>(m, "PotentialPairContinuousSquareWell");
+    detail::export_PotentialPair<EvaluatorPairExpandedYukawa>(m, "PotentialPairExpandedYukawa");
 
 #ifdef ENABLE_HIP
     detail::export_PotentialPairGPU<EvaluatorPairExample>(m, "PotentialPairExampleGPU");
     detail::export_PotentialPairGPU<EvaluatorPairContinuousSquareWell>(m, "PotentialPairContinuousSquareWellGPU");
+    detail::export_PotentialPairGPU<EvaluatorPairExpandedYukawa>(m, "PotentialPairExpandedYukawaGPU");
     
 #endif
     }
