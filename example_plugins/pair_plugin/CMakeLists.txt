@@ -18,6 +18,7 @@ set(_${COMPONENT_NAME}_sources
 set(_${COMPONENT_NAME}_cu_sources
     PotentialPairExampleGPUKernel.cu
     PotentialPairContinuousSquareWellGPUKernel.cu
+    PotentialPairExpandedYukawaGPUKernel.cu
     )
 
 if (ENABLE_HIP)
