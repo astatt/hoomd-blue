@@ -43,6 +43,7 @@ class EvaluatorPairContinuousSquareWell
         Scalar m; //!< second free parameter
         Scalar lambda_val; //!< approximate width of continuous square well potential, lambda_val has an effect on what n and m are chosen.
         Scalar A; //!< How to scale the depth of the square well
+        Scalar z; //!< Start of the continuous square well, will be minimum particle interaction parameter.
 
         DEVICE void load_shared(char*& ptr, unsigned int& available_bytes) { }
 
@@ -57,7 +58,7 @@ class EvaluatorPairContinuousSquareWell
 #endif
 
 #ifndef __HIPCC__
-        param_type() : n(0), m(0), lambda_val(0), A(0) { }
+        param_type() : n(0), m(0), lambda_val(0), A(0), z(0) { }
 
         param_type(pybind11::dict v, bool managed = false)
             {
@@ -66,6 +67,7 @@ class EvaluatorPairContinuousSquareWell
             m = v["m"].cast<Scalar>();
             lambda_val = v["lambda_val"].cast<Scalar>();
             A = v["A"].cast<Scalar>();
+            z = v["z"].cast<Scalar>();
             }
 
         pybind11::dict asDict()
@@ -76,6 +78,7 @@ class EvaluatorPairContinuousSquareWell
             v["m"] = m;
             v["lambda_val"] = lambda_val;
             v["A"] = A;
+            v["z"] = z;
             return v;
             }
 #endif
@@ -92,8 +95,8 @@ class EvaluatorPairContinuousSquareWell
         \param _params Per type pair parameters of this potential
     */
     DEVICE EvaluatorPairContinuousSquareWell(Scalar _rsq, Scalar _rcutsq, const param_type& _params)
-    //TODO: add all variable assignments here  
-        : rsq(_rsq), rcutsq(_rcutsq), n(_params.n), m(_params.m), lambda_val(_params.lambda_val), A(_params.A)
+    //TODO: add all variable assignments here
+        : rsq(_rsq), rcutsq(_rcutsq), n(_params.n), m(_params.m), lambda_val(_params.lambda_val), A(_params.A), z(_params.z)
         {
         }
 
@@ -126,16 +129,16 @@ class EvaluatorPairContinuousSquareWell
             {
             Scalar r = fast::sqrt(rsq);
             Scalar rinv = 1 / r;
-            Scalar exponent = exp(-m*(r - 1)*(r - lambda_val));
-           
+            Scalar exponent = exp(-m*(r - z)*(r - lambda_val));
+
             //TODO: change this to be force divided by r
-            force_divr = A*rinv*(n/2*pow(rinv, n + 1) - (m*(2*r - lambda_val - 1)*exponent)/pow(1 + exponent, 2));
-            //TODO: change this to be energy 
+            force_divr = A*rinv*(n/2*pow(rinv, n + 1) - (m*(2*r - lambda_val - z)*exponent)/pow(1 + exponent, 2));
+            //TODO: change this to be energy
             pair_eng = A*0.5*(pow(rinv, n) + (1 - exponent)/(1 + exponent) - 1);
 
             //TODO: this is related to 'none', 'xplor', and 'shift' - look into hoomd documentation
-            //TODO: to see which mode makes sense for this potential. 
-            //TODO: Might only be 'none', i.e. energy_shift = false 
+            //TODO: to see which mode makes sense for this potential.
+            //TODO: Might only be 'none', i.e. energy_shift = false
             if (energy_shift)
                 {
                 }
@@ -175,11 +178,12 @@ class EvaluatorPairContinuousSquareWell
     protected:
     Scalar rsq;    //!< Stored rsq from the constructor
     Scalar rcutsq; //!< Stored rcutsq from the constructor
-    //TODO: add parameters needed for potential here 
+    //TODO: add parameters needed for potential here
     Scalar n;      //!< Stored n from the constructor
     Scalar m;  //!< Stored m from the constructor
     Scalar lambda_val; //!< Stored lambda value from the constructor
     Scalar A;
+    Scalar z;
     };
 
     }  // end namespace md

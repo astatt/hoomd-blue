@@ -29,8 +29,8 @@ class ExamplePair(pair.Pair):
 
 class ContinuousSquareWellPair(pair.Pair):
     """ContinuousSquareWell pair potential.
-    
-    #TODO: write proper documentation for this - see hoomd documentation for examples 
+
+    #TODO: write proper documentation for this - see hoomd documentation for examples
 
     """
 
@@ -47,13 +47,13 @@ class ContinuousSquareWellPair(pair.Pair):
         super().__init__(nlist, default_r_cut, default_r_on, mode)
         params = TypeParameter(
             'params', 'particle_types',
-            TypeParameterDict(n=float, m=float, lambda_val=float, A=float, len_keys=2))
+            TypeParameterDict(n=float, m=float, lambda_val=float, A=float, z=float, len_keys=2))
         self._add_typeparam(params)
 
 class ExpandedYukawaPair(pair.Pair):
     """ExpandedYukawa pair potential.
-    
-    #TODO: write proper documentation for this - see hoomd documentation for examples 
+
+    #TODO: write proper documentation for this - see hoomd documentation for examples
 
     """
 
@@ -72,4 +72,3 @@ class ExpandedYukawaPair(pair.Pair):
             'params', 'particle_types',
             TypeParameterDict(epsilon=float, kappa=float, delta=float, len_keys=2))
         self._add_typeparam(params)
-

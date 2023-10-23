@@ -12,7 +12,7 @@ import pytest
 import numpy as np
 
 #TODO: change this function to be squarewell, add parameters needed
-def squarewell_force_and_energy(dx, n, m, lambda_val, A, r_cut, shift=False):
+def squarewell_force_and_energy(dx, n, m, lambda_val, A, z, r_cut, shift=False):
 
     dr = np.linalg.norm(dx)
 
@@ -21,16 +21,16 @@ def squarewell_force_and_energy(dx, n, m, lambda_val, A, r_cut, shift=False):
     if dr >= r_cut:
         return np.array([0.0, 0.0, 0.0], dtype=np.float64), 0.0
 
-    exponent = np.exp(-m*(dr - 1)*(dr - lambda_val))
+    exponent = np.exp(-m*(dr - z)*(dr - lambda_val))
 
-    f = A*n/2.0*(1/dr)**(n + 1) - m*(2*dr - lambda_val - 1)*exponent/(1 + exponent)**2.0
+    f = A*n/2.0*(1/dr)**(n + 1) - m*(2*dr - lambda_val - z)*exponent/(1 + exponent)**2.0
     e = A*0.5*((1/dr)**n + (1 - exponent)/(1 + exponent) - 1)
     if shift:
         e = e
     print(f, e)
     return f, e
 
-#TODO: decide on distances and parameters to use for test 
+#TODO: decide on distances and parameters to use for test
 
 # Build up list of parameters.
 distances = np.array([1.01, 1.05, 2.0])
@@ -38,21 +38,22 @@ ns = [400, 2500]
 ms = [400, 20000]
 lambda_vals = [1.5, 1.05]
 As = [1]
+zs = 1
 # No need to test "xplor", as that is handled outside of the plugin impl.
 modes = ["none"]
 
 energies = [[-0.86719137, -0.86719137], [-0.9998766, -0.9998766], [0.0, 0.0], [-0.99966465, -0.99966465], [-0.5, -0.5], [0.0, 0.0]]
 
-testdata = [(1.01, 400, 400, 1.5, 1.0, modes[0], [-0.86719137, -0.86719137], [-2.44784406e+01, 2.44784406e+01]), (1.05, 400, 400, 1.5, 1.0, modes[0], [-0.9998766, -0.9998766], [-1.97413329e-02, 1.97413329e-02]), (2.0, 400, 400, 1.5, 1.0, modes[0], [0.0, 0.0], [8.30337916e-85, -8.30337916e-85]), (1.01, 2500, 20000, 1.05, 1.0, modes[0], [-0.99966465, -0.99966465], [-2.01142622e-01, 2.01142622e-01]), (1.05, 2500, 20000, 1.05, 1.0, modes[0], [-0.5, -0.5], [2.50000000e+02, -2.50000000e+02]), (2.0, 2500, 20000, 1.05, 1.0, modes[0], [0.0, 0.0], [0.00000000e+00, 0.00000000e+00])]
+testdata = [(1.01, 400, 400, 1.5, 1.0, modes[0], zs, [-0.86719137, -0.86719137], [-2.44784406e+01, 2.44784406e+01]), (1.05, 400, 400, 1.5, 1.0, modes[0], zs,[-0.9998766, -0.9998766], [-1.97413329e-02, 1.97413329e-02]), (2.0, 400, 400, 1.5, 1.0, modes[0], zs, [0.0, 0.0], [8.30337916e-85, -8.30337916e-85]), (1.01, 2500, 20000, 1.05, 1.0, modes[0], zs, [-0.99966465, -0.99966465], [-2.01142622e-01, 2.01142622e-01]), (1.05, 2500, 20000, 1.05, 1.0, modes[0], zs, [-0.5, -0.5], [2.50000000e+02, -2.50000000e+02]), (2.0, 2500, 20000, 1.05, 1.0, modes[0], zs, [0.0, 0.0], [0.00000000e+00, 0.00000000e+00])]
 
 # testdata = list(itertools.product(distances, ns, ms, lambda_vals, modes, energies))
 
 
 
-@pytest.mark.parametrize("distance, n, m, lambda_val, A, mode, energies, forces", testdata)
+@pytest.mark.parametrize("distance, n, m, lambda_val, A, mode, z, energies, forces", testdata)
 def test_force_and_energy_eval(simulation_factory,
                                two_particle_snapshot_factory, distance, n, m,
-                               lambda_val, A, mode, energies, forces):
+                               lambda_val, A, mode, z, energies, forces):
 
     # Build the simulation from the factory fixtures defined in
     # hoomd/conftest.py.
@@ -63,10 +64,10 @@ def test_force_and_energy_eval(simulation_factory,
     nve = hoomd.md.methods.ConstantVolume(hoomd.filter.All())
 
     cell = hoomd.md.nlist.Cell(buffer=0.4)
-    #TODO: change names to correct square well ones 
+    #TODO: change names to correct square well ones
     example_pair: hoomd.md.pair.Pair = pair_plugin.pair.ContinuousSquareWellPair(
         cell, default_r_cut=3, mode=mode)
-    example_pair.params[("A", "A")] = dict(n = n, m = m, lambda_val = lambda_val, A = A)
+    example_pair.params[("A", "A")] = dict(n = n, m = m, lambda_val = lambda_val, A = A, z = z)
     integrator.forces = [example_pair]
     integrator.methods = [nve]
 
@@ -79,7 +80,7 @@ def test_force_and_energy_eval(simulation_factory,
 
         shift = mode == "none"
         # Compute force and energy from Python
-        f, e = squarewell_force_and_energy(vec_dist, n, m, lambda_val, A, 3, shift)
+        f, e = squarewell_force_and_energy(vec_dist, n, m, lambda_val, A, z, 3, shift)
         # e /= 2.0
 
     # Test that the forces and energies match that predicted by the Python
