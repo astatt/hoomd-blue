@@ -129,12 +129,13 @@ class EvaluatorPairContinuousSquareWell
             {
             Scalar r = fast::sqrt(rsq);
             Scalar rinv = 1 / r;
-            Scalar exponent = exp(-m*(r - z)*(r - lambda_val));
+            Scalar rinv_shift = 1 / (r - (z - 1));
+            Scalar exponent = exp(-m*(r - z)*(r - z - lambda_val));
 
             //TODO: change this to be force divided by r
-            force_divr = A*rinv*(n/2*pow(rinv, n + 1) - (m*(2*r - lambda_val - z)*exponent)/pow(1 + exponent, 2));
+            force_divr = A*rinv*(n/2*pow(rinv_shift, n + 1) - (m*(2*r - lambda_val - 2*z)*exponent)/pow(1 + exponent, 2));
             //TODO: change this to be energy
-            pair_eng = A*0.5*(pow(rinv, n) + (1 - exponent)/(1 + exponent) - 1);
+            pair_eng = A*0.5*(pow(rinv_shift, n) + (1 - exponent)/(1 + exponent) - 1);
 
             //TODO: this is related to 'none', 'xplor', and 'shift' - look into hoomd documentation
             //TODO: to see which mode makes sense for this potential.
