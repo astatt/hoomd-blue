@@ -1,8 +1,8 @@
 // Copyright (c) 2009-2023 The Regents of the University of Michigan.
 // Part of HOOMD-blue, released under the BSD 3-Clause License.
 
-#ifndef __PAIR_EVALUATOR_CONTINUOUSSQUAREWELL_H__
-#define __PAIR_EVALUATOR_CONTINUOUSSQUAREWELL_H__
+#ifndef __PAIR_EVALUATOR_GCMSADJ_H__
+#define __PAIR_EVALUATOR_GCMSADJ_H__
 
 #ifndef __HIPCC__
 #include <string>
@@ -31,7 +31,7 @@ namespace hoomd
 namespace md
     {
 
-class EvaluatorPairContinuousSquareWell
+class EvaluatorPairGCMSAdj
     {
     public:
     //! Define the parameter type used by this pair potential evaluator
@@ -39,11 +39,11 @@ class EvaluatorPairContinuousSquareWell
         {
 
         //TODO: add all variable names needed for potential
-        Scalar n;     //!< first free parameter
-        Scalar m; //!< second free parameter
-        Scalar lambda_val; //!< approximate width of continuous square well potential, lambda_val has an effect on what n and m are chosen.
-        Scalar A; //!< How to scale the depth of the square well
-        Scalar z; //!< Start of the continuous square well, will be minimum particle interaction parameter.
+        Scalar w;     //!< width of well
+        Scalar sigma; //!< core size
+        Scalar a; //!< well depth
+        Scalar q; //!< exponent to determine well steepness
+
 
         DEVICE void load_shared(char*& ptr, unsigned int& available_bytes) { }
 
@@ -58,27 +58,25 @@ class EvaluatorPairContinuousSquareWell
 #endif
 
 #ifndef __HIPCC__
-        param_type() : n(0), m(0), lambda_val(0), A(0), z(0) { }
+        param_type() : w(0), sigma(0), a(0), q(0) { }
 
         param_type(pybind11::dict v, bool managed = false)
             {
             //TODO: add all variables needed - this communicates the variables between python and c++
-            n = v["n"].cast<Scalar>();
-            m = v["m"].cast<Scalar>();
-            lambda_val = v["lambda_val"].cast<Scalar>();
-            A = v["A"].cast<Scalar>();
-            z = v["z"].cast<Scalar>();
+            w = v["w"].cast<Scalar>();
+            sigma = v["sigma"].cast<Scalar>();
+            a = v["a"].cast<Scalar>();
+            q = v["q"].cast<Scalar>();
             }
 
         pybind11::dict asDict()
             {
             pybind11::dict v;
             //TODO: add all variables needed
-            v["n"] = n;
-            v["m"] = m;
-            v["lambda_val"] = lambda_val;
-            v["A"] = A;
-            v["z"] = z;
+            v["w"] = w;
+            v["sigma"] = sigma;
+            v["a"] = a;
+            v["q"] = q;
             return v;
             }
 #endif
@@ -94,9 +92,9 @@ class EvaluatorPairContinuousSquareWell
         \param _rcutsq Squared distance at which the potential goes to 0
         \param _params Per type pair parameters of this potential
     */
-    DEVICE EvaluatorPairContinuousSquareWell(Scalar _rsq, Scalar _rcutsq, const param_type& _params)
+    DEVICE EvaluatorPairGCMSAdj(Scalar _rsq, Scalar _rcutsq, const param_type& _params)
     //TODO: add all variable assignments here
-        : rsq(_rsq), rcutsq(_rcutsq), n(_params.n), m(_params.m), lambda_val(_params.lambda_val), A(_params.A), z(_params.z)
+        : rsq(_rsq), rcutsq(_rcutsq), w(_params.w), sigma(_params.sigma), a(_params.a), q(_params.q)
         {
         }
 
@@ -125,17 +123,18 @@ class EvaluatorPairContinuousSquareWell
     DEVICE bool evalForceAndEnergy(Scalar& force_divr, Scalar& pair_eng, bool energy_shift)
         {
         // compute the force divided by r in force_divr
-        if (rsq < rcutsq)
+        if (rsq < rcutsq && a != 0 && w != 0)
             {
             Scalar r = fast::sqrt(rsq);
             Scalar rinv = 1 / r;
-            Scalar rinv_shift = 1 / (r - z + 1);
-            Scalar exponent = exp(-m*(r - z)*(r - z - lambda_val));
+            Scalar w_rinv_shifted = w / (r - sigma + w);
+            Scalar core_repuls = pow(w_rinv_shifted, q);
+            Scalar exponent = exp(q*(r - sigma - w)/w);
 
             //TODO: change this to be force divided by r
-            force_divr = A*rinv*(n*0.5*pow(rinv_shift, n + 1) - (m*(2*r - lambda_val - 2*z)*exponent)/pow(1 + exponent, 2));
+            force_divr = a*rinv*(q*core_repuls*w_rinv_shifted - q*exponent/(w*(pow(1 + exponent, 2.0))));
             //TODO: change this to be energy
-            pair_eng = A*0.5*(pow(rinv_shift, n) + (1 - exponent)/(1 + exponent) - 1);
+            pair_eng = a*(1/(1 + exponent) - core_repuls);
 
             //TODO: this is related to 'none', 'xplor', and 'shift' - look into hoomd documentation
             //TODO: to see which mode makes sense for this potential.
@@ -167,7 +166,7 @@ class EvaluatorPairContinuousSquareWell
      */
     static std::string getName()
         {
-        return std::string("squarewell_pair");
+        return std::string("gcms_adj_pair");
         }
 
     std::string getShapeSpec() const
@@ -180,11 +179,10 @@ class EvaluatorPairContinuousSquareWell
     Scalar rsq;    //!< Stored rsq from the constructor
     Scalar rcutsq; //!< Stored rcutsq from the constructor
     //TODO: add parameters needed for potential here
-    Scalar n;      //!< Stored n from the constructor
-    Scalar m;  //!< Stored m from the constructor
-    Scalar lambda_val; //!< Stored lambda value from the constructor
-    Scalar A;
-    Scalar z;
+    Scalar w;      //!< Stored width of well
+    Scalar sigma;  //!< Stored core size from the constructor
+    Scalar a; //!< Stored depth from the constructor
+    Scalar q; //?< Stored exponent from the constructor
     };
 
     }  // end namespace md

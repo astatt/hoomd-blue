@@ -72,3 +72,26 @@ class ExpandedYukawaPair(pair.Pair):
             'params', 'particle_types',
             TypeParameterDict(epsilon=float, kappa=float, delta=float, len_keys=2))
         self._add_typeparam(params)
+
+class GCMSAdjPair(pair.Pair):
+    """GCMS Adjusted pair potential.
+
+    #TODO: write proper documentation for this - see hoomd documentation for examples
+
+    """
+
+    # set static class data
+    _ext_module = _pair_plugin
+    _cpp_class_name = "PotentialPairGCMSAdj"
+
+    #TODO: check that these modes make sense for potential - I think only none might make sense?
+    #TODO: check in hoomd documentation for what these do
+
+    _accepted_modes = ("none", "shift")
+
+    def __init__(self, nlist, default_r_cut=None, default_r_on=0., mode='none'):
+        super().__init__(nlist, default_r_cut, default_r_on, mode)
+        params = TypeParameter(
+            'params', 'particle_types',
+            TypeParameterDict(w=float, sigma=float, a=float, q=float, len_keys=2))
+        self._add_typeparam(params)
