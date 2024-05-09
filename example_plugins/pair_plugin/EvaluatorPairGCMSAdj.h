@@ -132,7 +132,7 @@ class EvaluatorPairGCMSAdj
             Scalar exponent = exp(q*(r - sigma - w)/w);
 
             //TODO: change this to be force divided by r
-            force_divr = a*rinv*(q*core_repuls*w_rinv_shifted - q*exponent/(w*(pow(1 + exponent, 2.0))));
+            force_divr = -a*rinv*(q*core_repuls*w_rinv_shifted - q*exponent/(w*(pow(1 + exponent, 2.0))));
             //TODO: change this to be energy
             pair_eng = a*(1/(1 + exponent) - core_repuls);
 
